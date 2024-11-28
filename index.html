@@ -23,7 +23,7 @@
     }
     input, button {
       padding: 10px;
-      margin: 5px;
+      margin: 10px 5px;
       border-radius: 5px;
       border: 1px solid #ccc;
     }
@@ -35,6 +35,10 @@
     button:hover {
       background-color: #45a049;
     }
+    #download-btn {
+      margin-top: 10px;
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -44,15 +48,18 @@
   <button onclick="generateImage()">Generate Image</button>
   <div id="response"></div>
   <img id="image" alt="Generated Image" />
+  <button id="download-btn" onclick="downloadImage()">Download Image</button>
 
   <script>
     async function generateImage() {
       const prompt = document.getElementById('prompt').value;
       const imageElement = document.getElementById('image');
       const responseDiv = document.getElementById('response');
+      const downloadButton = document.getElementById('download-btn');
 
       responseDiv.innerText = "Generating image...";
       imageElement.style.display = "none";
+      downloadButton.style.display = "none";
 
       const url = 'https://spectra-v1-image-generator.p.rapidapi.com/generate';
       const options = {
@@ -77,8 +84,11 @@
         const data = await response.json();
 
         if (data.image) {
-          imageElement.src = `data:image/png;base64,${data.image}`;
+          const base64Image = data.image;
+          imageElement.src = `data:image/png;base64,${base64Image}`;
           imageElement.style.display = "block";
+          downloadButton.style.display = "block";
+          downloadButton.setAttribute("data-base64", base64Image);
           responseDiv.innerText = "";
         } else {
           responseDiv.innerText = "Failed to generate image.";
@@ -87,6 +97,14 @@
         console.error(error);
         responseDiv.innerText = "An error occurred: " + error.message;
       }
+    }
+
+    function downloadImage() {
+      const base64Image = document.getElementById('download-btn').getAttribute("data-base64");
+      const link = document.createElement('a');
+      link.href = `data:image/png;base64,${base64Image}`;
+      link.download = 'generated_image.png';
+      link.click();
     }
   </script>
 
